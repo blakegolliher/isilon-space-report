@@ -70,7 +70,7 @@ data.close()
 FROM = 'snakemail@somewhere.com'
 TO = ['blakegolliher@gmail.com']
 
-msg['Subject'] = 'Isilon Cluster Usage Report : %s' % dateort'
+msg['Subject'] = 'Isilon Cluster Usage Report : %s' % date
 msg['To'] = ", ".join(TO)
 
 s = smtplib.SMTP('localhost')
