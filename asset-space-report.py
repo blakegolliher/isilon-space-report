@@ -35,23 +35,27 @@ def sizeof_fmt(num):
     return "%3.1f%s" % (num, 'TB')
 
 def getnfs(target):
-  session = netsnmp.Session(DestHost=target, Version=2, Community=communitystring)
-	uspacevar = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.4.1.12124.1.3.2.0'))
-	aspacevar = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.4.1.12124.1.3.3.0'))
-	uspace  = session.get(uspacevar)
-	aspace  = session.get(aspacevar)
-  used = ''.join(c for c in uspace if c not in '()')
- 	avail = ''.join(c for c in aspace if c not in '()')
-## you can print this out if you want the output on the console
-## print "\t\t%s - has %s used and %s available." % (target, sizeof_fmt(int(used)), sizeof_fmt(int(avail)))
-	return "\t\t%s - has %s used and %s available." % (target, sizeof_fmt(int(used)), sizeof_fmt(int(avail)))
-
+        session = netsnmp.Session(DestHost=target, Version=2, Community=communitystring)
+        uspacevar = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.4.1.12124.1.3.2.0'))
+        aspacevar = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.4.1.12124.1.3.3.0'))
+        tspacevar = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.4.1.12124.1.3.1.0'))
+        uspace  = session.get(uspacevar)
+        aspace  = session.get(aspacevar)
+        tspace  = session.get(tspacevar)
+        pspace = float(aspace[0]) / float(tspace[0]) * 100
+        print "\t\t%s : used = %s : availible space = %s : free = %.2f %% " % (target, sizeof_fmt(int(uspace[0])), sizeof_fmt(int(aspace[0])), pspace)
+        return "\t\t%s : used = %s : availible space = %s : free = %.2f %% " % (target, sizeof_fmt(int(uspace[0])), sizeof_fmt(int(aspace[0])), pspace)
+        
 ## cleans up from the last run
 if os.path.exists('./data'):
     os.remove('./data')
 
-data=open('./data', 'w+')
-data.write("Primary Isilon Clusters :: Space Report\n")
+hostami = os.getenv('HOSTNAME')
+whereami = os.getcwd()
+whoami = os.path.basename(__file__)
+
+f1=open('./data', 'w+')
+f1.write("Sent from : %s:%s/%s \n\n" % (hostami,whereami,whoami))
 
 for clustername in primcluster:
 	data.write("\t%s\n" % getnfs(clustername))
